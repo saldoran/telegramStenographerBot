@@ -70,7 +70,7 @@ class MessageHandlers:
         try:
             if message.text:
                 # Текстовое сообщение
-                duplicate_text = f"� {display_name}: {message.text}"
+                duplicate_text = f"💬 {display_name}: {message.text}"
                 await message.get_bot().send_message(
                     chat_id=chat_id,
                     text=duplicate_text,
@@ -101,7 +101,7 @@ class MessageHandlers:
                 # Фото
                 caption = message.caption or ""
                 if caption:
-                    duplicate_text = f"� {display_name}: {caption}"
+                    duplicate_text = f"📷 {display_name}: {caption}"
                 else:
                     duplicate_text = f"📸 {display_name}: Фото"
                 await message.get_bot().send_message(
@@ -125,7 +125,7 @@ class MessageHandlers:
                 file_name = message.document.file_name or "Документ"
                 caption = message.caption or ""
                 if caption:
-                    duplicate_text = f"� {display_name}: {caption}"
+                    duplicate_text = f"📄 {display_name}: {caption}"
                 else:
                     duplicate_text = f"📄 {display_name}: {file_name}"
                 await message.get_bot().send_message(
