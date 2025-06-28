@@ -78,41 +78,56 @@ class MessageHandlers:
                 )
                 
             elif message.voice:
-                # Голосовое сообщение
+                # Голосовое сообщение - пересылаем само голосовое
                 duration = message.voice.duration
-                duplicate_text = f"🎵 {display_name}: Голосовое сообщение ({duration}с)"
-                await message.get_bot().send_message(
+                caption = f"🎵 {display_name}: Голосовое сообщение ({duration}с)"
+                logger.info(f"🔍 ГОЛОСОВОЕ СООБЩЕНИЕ: duration={duration}, пересылаем файл")
+                await message.get_bot().send_voice(
                     chat_id=chat_id,
-                    text=duplicate_text,
+                    voice=message.voice.file_id,
+                    caption=caption,
                     reply_to_message_id=message_id
                 )
                 
             elif message.video_note:
-                # Видеосообщение (кружочек)
+                # Видеосообщение (кружочек) - пересылаем само видео
                 duration = message.video_note.duration
-                duplicate_text = f"🎥 {display_name}: Видеосообщение ({duration}с)"
+                caption = f"🎥 {display_name}: Видеосообщение ({duration}с)"
+                await message.get_bot().send_video_note(
+                    chat_id=chat_id,
+                    video_note=message.video_note.file_id,
+                    reply_to_message_id=message_id
+                )
+                # Отправляем также текстовое описание
                 await message.get_bot().send_message(
                     chat_id=chat_id,
-                    text=duplicate_text,
+                    text=caption,
                     reply_to_message_id=message_id
                 )
                 
             elif message.photo:
-                # Фото
+                # Фото - пересылаем само фото
                 caption = message.caption or ""
                 if caption:
-                    duplicate_text = f"📷 {display_name}: {caption}"
+                    new_caption = f"📷 {display_name}: {caption}"
                 else:
-                    duplicate_text = f"📸 {display_name}: Фото"
-                await message.get_bot().send_message(
+                    new_caption = f"📸 {display_name}: Фото"
+                await message.get_bot().send_photo(
                     chat_id=chat_id,
-                    text=duplicate_text,
+                    photo=message.photo[-1].file_id,  # Берем фото наибольшего размера
+                    caption=new_caption,
                     reply_to_message_id=message_id
                 )
                 
             elif message.sticker:
-                # Стикер
+                # Стикер - пересылаем сам стикер
                 emoji = message.sticker.emoji or "❓"
+                await message.get_bot().send_sticker(
+                    chat_id=chat_id,
+                    sticker=message.sticker.file_id,
+                    reply_to_message_id=message_id
+                )
+                # Отправляем также текстовое описание
                 duplicate_text = f"🎭 {display_name}: Стикер {emoji}"
                 await message.get_bot().send_message(
                     chat_id=chat_id,
@@ -121,13 +136,110 @@ class MessageHandlers:
                 )
                 
             elif message.document:
-                # Документ
+                # Документ - пересылаем сам документ
                 file_name = message.document.file_name or "Документ"
                 caption = message.caption or ""
                 if caption:
-                    duplicate_text = f"📄 {display_name}: {caption}"
+                    new_caption = f"📄 {display_name}: {caption}"
                 else:
-                    duplicate_text = f"📄 {display_name}: {file_name}"
+                    new_caption = f"📄 {display_name}: {file_name}"
+                await message.get_bot().send_document(
+                    chat_id=chat_id,
+                    document=message.document.file_id,
+                    caption=new_caption,
+                    reply_to_message_id=message_id
+                )
+                
+            elif message.video:
+                # Видео - пересылаем само видео
+                duration = message.video.duration
+                caption = message.caption or ""
+                if caption:
+                    new_caption = f"🎬 {display_name}: {caption}"
+                else:
+                    new_caption = f"🎬 {display_name}: Видео ({duration}с)"
+                await message.get_bot().send_video(
+                    chat_id=chat_id,
+                    video=message.video.file_id,
+                    caption=new_caption,
+                    reply_to_message_id=message_id
+                )
+                
+            elif message.audio:
+                # Аудио - пересылаем само аудио
+                duration = message.audio.duration
+                title = message.audio.title or "Аудио"
+                new_caption = f"🎶 {display_name}: {title} ({duration}с)"
+                await message.get_bot().send_audio(
+                    chat_id=chat_id,
+                    audio=message.audio.file_id,
+                    caption=new_caption,
+                    reply_to_message_id=message_id
+                )
+                
+            elif message.animation:
+                # GIF анимация - пересылаем саму анимацию
+                caption = message.caption or ""
+                if caption:
+                    new_caption = f"🎭 {display_name}: {caption}"
+                else:
+                    new_caption = f"🎭 {display_name}: GIF анимация"
+                await message.get_bot().send_animation(
+                    chat_id=chat_id,
+                    animation=message.animation.file_id,
+                    caption=new_caption,
+                    reply_to_message_id=message_id
+                )
+                
+            elif message.location:
+                # Местоположение - пересылаем само местоположение
+                await message.get_bot().send_location(
+                    chat_id=chat_id,
+                    latitude=message.location.latitude,
+                    longitude=message.location.longitude,
+                    reply_to_message_id=message_id
+                )
+                # Отправляем текстовое описание
+                duplicate_text = f"📍 {display_name}: Местоположение"
+                await message.get_bot().send_message(
+                    chat_id=chat_id,
+                    text=duplicate_text,
+                    reply_to_message_id=message_id
+                )
+                
+            elif message.contact:
+                # Контакт - пересылаем сам контакт
+                await message.get_bot().send_contact(
+                    chat_id=chat_id,
+                    phone_number=message.contact.phone_number,
+                    first_name=message.contact.first_name,
+                    last_name=message.contact.last_name,
+                    reply_to_message_id=message_id
+                )
+                # Отправляем текстовое описание
+                contact_name = message.contact.first_name
+                if message.contact.last_name:
+                    contact_name += f" {message.contact.last_name}"
+                duplicate_text = f"👤 {display_name}: Контакт {contact_name}"
+                await message.get_bot().send_message(
+                    chat_id=chat_id,
+                    text=duplicate_text,
+                    reply_to_message_id=message_id
+                )
+                
+            elif message.poll:
+                # Опрос - пересылаем сам опрос
+                await message.get_bot().send_poll(
+                    chat_id=chat_id,
+                    question=message.poll.question,
+                    options=[option.text for option in message.poll.options],
+                    is_anonymous=message.poll.is_anonymous,
+                    type=message.poll.type,
+                    allows_multiple_answers=message.poll.allows_multiple_answers,
+                    reply_to_message_id=message_id
+                )
+                # Отправляем текстовое описание
+                duplicate_text = f"📊 {display_name}: {message.poll.question}"
                 await message.get_bot().send_message(
                     chat_id=chat_id,
                     text=duplicate_text,
